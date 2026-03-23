@@ -434,8 +434,9 @@ function insertPunch(tbody, di) {
     <td class="clock-label">Clock In</td>
     <td><input type="time" id="ci-${di}-${p}"></td>
     <td></td>
-    ${TASK_COLS.map(c => `<td style="text-align:center"><input type="number" id="${c}-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>`).join('')}
-    <td></td>
+    ${TASK_COLS.filter(c => c !== 'other-hrs').map(c => `<td style="text-align:center"><input type="number" id="${c}-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>`).join('')}
+    <td style="text-align:center"><input type="number" id="other-hrs-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>
+    <td><input type="text" class="other-desc" id="desc-${di}-${p}" placeholder="Describe other task…"></td>
     <td class="row-total" id="rt-${di}-${p}">—</td>
     <td rowspan="2" style="text-align:center;vertical-align:middle;background:var(--cell-bg);border-right:none">
       ${p > 0 ? `<button class="remove-punch-btn" onclick="removePunch(${di},${p})" title="Remove">×</button>` : ''}
@@ -448,9 +449,7 @@ function insertPunch(tbody, di) {
     <td class="clock-label">Clock Out</td>
     <td></td>
     <td><input type="time" id="co-${di}-${p}"></td>
-    <td colspan="5"></td>
-    <td><input type="text" class="other-desc" id="desc-${di}-${p}" placeholder="Describe other task…"></td>
-    <td></td>`;
+    <td colspan="8"></td>`;
 
   if (anchor) {
     tbody.insertBefore(inTr, anchor);
