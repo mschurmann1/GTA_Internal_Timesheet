@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTA Internal Timesheet</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f7f4ef;
+    --accent: #c0392b;
+    --rule: #d0c9bc;
+    --muted: #7a7060;
+    --cell-bg: #ffffff;
+    --header-bg: #1a1a2e;
+    --header-fg: #f7f4ef;
+    --total-bg: #eae6df;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .page-wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Header */
+  .sheet-header {
+    background: var(--header-bg);
+    color: var(--header-fg);
+    padding: 1.8rem 2rem 1.4rem;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .sheet-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.55rem;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+  .sheet-header .subtitle {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  /* Meta */
+  .meta-row {
+    background: var(--cell-bg);
+    border: 1px solid var(--rule);
+    border-top: none;
+    padding: 1rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .meta-field label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .meta-field input {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    padding: 3px 0;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .meta-field input:focus { border-bottom-color: var(--accent); }
+
+  /* Table */
+  .timesheet-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--rule);
+    border-top: none;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 880px;
+  }
+  thead tr {
+    background: var(--header-bg);
+    color: var(--header-fg);
+  }
+  thead th {
+    padding: 8px 7px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+  }
+  thead th:first-child { text-align: left; padding-left: 14px; }
+  thead th.th-action { width: 28px; border-right: none; }
+
+  /* Day label */
+  .day-label-row td {
+    background: #eae7e0;
+    color: var(--ink);
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    padding: 5px 14px;
+    border-top: 2px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .day-label-row .day-date-input {
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 108px;
+    margin-left: 8px;
+    outline: none;
+    padding: 1px 2px;
+  }
+  .day-label-row .day-date-input:focus { border-bottom-color: var(--accent); }
+  .add-punch-btn {
+    float: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border: 1px solid var(--muted);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-punch-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(192,57,43,0.05); }
+
+  /* Clock rows */
+  .clock-row td {
+    background: var(--cell-bg);
+    border-bottom: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
+    padding: 4px 6px;
+    vertical-align: middle;
+  }
+  .clock-row.in-row td { border-bottom: 1px dashed #e8e2d8; }
+
+  .clock-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    padding-left: 14px !important;
+    width: 100px;
+  }
+
+  input[type="time"] {
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    width: 88px;
+    padding: 2px;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  input[type="number"] {
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    width: 54px;
+    padding: 2px;
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  input[type="text"].other-desc {
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    width: 100%;
+    padding: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-bottom-color: var(--accent) !important; }
+
+  .row-total {
+    background: var(--total-bg) !important;
+    font-weight: 500;
+    text-align: center !important;
+    color: var(--accent);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .remove-punch-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ccc;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    transition: color 0.15s;
+    display: block;
+    margin: auto;
+  }
+  .remove-punch-btn:hover { color: var(--accent); }
+
+  /* Week total */
+  .week-total-row td {
+    background: var(--header-bg);
+    color: var(--header-fg);
+    padding: 8px 10px;
+    border-top: 2px solid var(--ink);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .week-total-row td:first-child {
+    text-align: left;
+    padding-left: 14px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 14px;
+  }
+  .week-total-row .col-total { color: #f0c060; }
+  .week-total-row .grand-total {
+    color: #f0c060;
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px;
+  }
+
+  /* Signatures */
+  .sig-section {
+    background: var(--cell-bg);
+    border: 1px solid var(--rule);
+    border-top: none;
+    padding: 1.5rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  .sig-field label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .sig-line { border-bottom: 1.5px solid var(--ink); height: 36px; }
+  .sig-hint { font-size: 10px; color: var(--muted); margin-top: 4px; font-style: italic; }
+
+  /* Actions */
+  .actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.18s;
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
+  .btn-primary:hover { background: #a93226; border-color: #a93226; }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; font-size: 10px; }
+    .page-wrap { max-width: 100%; }
+    .actions, .add-punch-btn, .remove-punch-btn, .th-action { display: none !important; }
+    .sheet-header, thead tr, .day-label-row td, .week-total-row td, .row-total {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    input { border: none !important; }
+    .sig-line { border-bottom: 1.5px solid black !important; }
+    @page { margin: 0.45in 0.4in; size: letter landscape; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <div class="sheet-header">
+    <div class="subtitle">Internal Document</div>
+    <h1>Graduate Teaching Assistant I &mdash; Timesheet</h1>
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-field">
+      <label>Employee Name</label>
+      <input type="text" id="emp-name" placeholder="Full Name">
+    </div>
+    <div class="meta-field">
+      <label>Employee ID</label>
+      <input type="text" id="emp-id" placeholder="ID Number">
+    </div>
+    <div class="meta-field">
+      <label>Week of (Monday)</label>
+      <input type="date" id="week-of">
+    </div>
+  </div>
+
+  <div class="timesheet-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:100px;text-align:left;padding-left:14px">Day / Punch</th>
+          <th style="width:84px">Clock In</th>
+          <th style="width:84px">Clock Out</th>
+          <th style="width:64px">Math Gym</th>
+          <th style="width:88px">Virtual Math Gym</th>
+          <th style="width:60px">Lecture</th>
+          <th style="width:64px">Meeting</th>
+          <th style="width:60px">Grading</th>
+          <th style="width:64px">Other (hrs)</th>
+          <th>Other (description)</th>
+          <th style="width:54px">Total</th>
+          <th class="th-action"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="sig-section">
+    <div class="sig-field">
+      <label>Graduate Teaching Assistant Signature</label>
+      <div class="sig-line"></div>
+      <div class="sig-hint">Sign above before submitting</div>
+    </div>
+    <div class="sig-field">
+      <label>Teaching Assistant Supervisor Signature</label>
+      <div class="sig-line"></div>
+      <div class="sig-hint">Supervisor approval required</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" onclick="clearAll()">Clear Form</button>
+    <button class="btn btn-primary" onclick="window.print()">Export as PDF</button>
+  </div>
+
+</div>
+<script>
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const TASK_COLS = ['math-gym','virt-gym','lecture','meeting','grading','other-hrs'];
+// punchCount[di] = next punch index for that day
+const punchCount = {};
+
+function buildTable() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  DAYS.forEach((day, di) => {
+    punchCount[di] = 0;
+    insertDayLabel(tbody, day, di);
+    insertPunch(tbody, di);
+  });
+  insertTotalsRow(tbody);
+}
+
+function insertDayLabel(tbody, day, di) {
+  const tr = document.createElement('tr');
+  tr.className = 'day-label-row';
+  tr.dataset.di = di;
+  tr.innerHTML = `<td colspan="12">
+    <strong>${day}</strong>
+    <input class="day-date-input" type="date" id="date-${di}">
+    <button class="add-punch-btn" onclick="addPunch(${di})">+ Add Punch</button>
+  </td>`;
+  tbody.appendChild(tr);
+}
+
+function insertPunch(tbody, di) {
+  const p = punchCount[di]++;
+
+  // Anchor = next day's label row, or the totals row if this is the last day
+  const nextDayLabel = tbody.querySelector(`.day-label-row[data-di="${di + 1}"]`);
+  const anchor = nextDayLabel || document.getElementById('totals-row');
+
+  const inTr = document.createElement('tr');
+  inTr.className = 'clock-row in-row';
+  inTr.id = `in-${di}-${p}`;
+  inTr.innerHTML = `
+    <td class="clock-label">Clock In</td>
+    <td><input type="time" id="ci-${di}-${p}"></td>
+    <td></td>
+    ${TASK_COLS.filter(c => c !== 'other-hrs').map(c => `<td style="text-align:center"><input type="number" id="${c}-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>`).join('')}
+    <td style="text-align:center"><input type="number" id="other-hrs-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>
+    <td><input type="text" class="other-desc" id="desc-${di}-${p}" placeholder="Describe other task…"></td>
+    <td class="row-total" id="rt-${di}-${p}">—</td>
+    <td rowspan="2" style="text-align:center;vertical-align:middle;background:var(--cell-bg);border-right:none">
+      ${p > 0 ? `<button class="remove-punch-btn" onclick="removePunch(${di},${p})" title="Remove">×</button>` : ''}
+    </td>`;
+
+  const outTr = document.createElement('tr');
+  outTr.className = 'clock-row out-row';
+  outTr.id = `out-${di}-${p}`;
+  outTr.innerHTML = `
+    <td class="clock-label">Clock Out</td>
+    <td></td>
+    <td><input type="time" id="co-${di}-${p}"></td>
+    <td colspan="8"></td>`;
+
+  if (anchor) {
+    tbody.insertBefore(inTr, anchor);
+    tbody.insertBefore(outTr, anchor);
+  } else {
+    tbody.appendChild(inTr);
+    tbody.appendChild(outTr);
+  }
+}
+
+function insertTotalsRow(tbody) {
+  const tr = document.createElement('tr');
+  tr.className = 'week-total-row';
+  tr.id = 'totals-row';
+  tr.innerHTML = `
+    <td colspan="3">Week Total</td>
+    ${TASK_COLS.map(c => `<td class="col-total" id="ct-${c}">0.00</td>`).join('')}
+    <td></td>
+    <td class="grand-total" id="grand-total">0.00</td>
+    <td></td>`;
+  tbody.appendChild(tr);
+}
+
+function addPunch(di) {
+  insertPunch(document.getElementById('tbody'), di);
+}
+
+function removePunch(di, p) {
+  document.getElementById(`in-${di}-${p}`)?.remove();
+  document.getElementById(`out-${di}-${p}`)?.remove();
+  calcTotals();
+}
+
+function recalc(di, p) {
+  let sum = 0;
+  TASK_COLS.forEach(c => { sum += parseFloat(document.getElementById(`${c}-${di}-${p}`)?.value) || 0; });
+  const rt = document.getElementById(`rt-${di}-${p}`);
+  if (rt) rt.textContent = sum > 0 ? sum.toFixed(2) : '—';
+  calcTotals();
+}
+
+function calcTotals() {
+  let grand = 0;
+  TASK_COLS.forEach(c => {
+    let col = 0;
+    document.querySelectorAll(`[id^="${c}-"]`).forEach(el => { col += parseFloat(el.value) || 0; });
+    const ct = document.getElementById(`ct-${c}`);
+    if (ct) ct.textContent = col.toFixed(2);
+    grand += col;
+  });
+  const g = document.getElementById('grand-total');
+  if (g) g.textContent = grand.toFixed(2);
+}
+
+function clearAll() {
+  if (!confirm('Clear all entered data?')) return;
+  document.getElementById('emp-name').value = '';
+  document.getElementById('emp-id').value = '';
+  document.getElementById('week-of').value = '';
+  buildTable();
+}
+
+buildTable();
+
+document.getElementById('week-of').addEventListener('change', function () {
+  const mon = new Date(this.value + 'T00:00:00');
+  if (isNaN(mon)) return;
+  DAYS.forEach((_, di) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + di);
+    const el = document.getElementById(`date-${di}`);
+    if (el) el.value = d.toISOString().split('T')[0];
+  });
+});
+</script>
+</body>
+</html>
