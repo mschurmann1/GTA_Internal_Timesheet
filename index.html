@@ -268,6 +268,47 @@
     font-size: 15px;
   }
 
+  /* Comments */
+  .comments-section {
+    background: var(--cell-bg);
+    border: 1px solid var(--rule);
+    border-top: none;
+    padding: 1rem 2rem;
+  }
+  .comments-label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .comments-section textarea {
+    width: 100%;
+    height: 72px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: #fafaf8;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    padding: 8px 10px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .comments-section textarea:focus { border-color: var(--accent); }
+  @media print {
+    .comments-section textarea {
+      border: none;
+      border-bottom: 1px solid var(--rule);
+      background: transparent;
+      resize: none;
+      height: auto;
+      min-height: 48px;
+    }
+  }
+
   /* Signatures */
   .sig-section {
     background: var(--cell-bg);
@@ -420,6 +461,11 @@
       </thead>
       <tbody id="tbody"></tbody>
     </table>
+  </div>
+
+  <div class="comments-section">
+    <label class="comments-label">Comments / Notes</label>
+    <textarea id="comments" placeholder=""></textarea>
   </div>
 
   <div class="sig-section">
