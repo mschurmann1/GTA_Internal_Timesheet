@@ -244,6 +244,7 @@
     margin: auto;
   }
   .remove-punch-btn:hover { color: var(--accent); }
+  .desc-print-row { display: none; }
 
   /* Week total */
   .week-total-row td {
@@ -417,6 +418,10 @@
     }
     input { border: none !important; }
     .sig-line { border-bottom: 1.5px solid black !important; }
+
+    /* Other description col shows on print, desc-print-row hidden */
+    .desc-print-row { display: none !important; }
+
     @page { margin: 0.45in 0.4in; size: letter landscape; }
   }
 </style>
@@ -444,18 +449,17 @@
     <table>
       <thead>
         <tr>
-          <th style="width:100px;text-align:left;padding-left:14px">Day / Punch</th>
-          <th style="width:84px">Clock In</th>
-          <th style="width:84px">Clock Out</th>
-          <th style="width:64px">Math Gym</th>
-          <th style="width:88px">Virtual Math Gym</th>
-          <th style="width:60px">Lecture</th>
-          <th style="width:64px">Meeting</th>
-          <th style="width:60px">Grading</th>
-          <th style="width:64px">Teaching</th>
-          <th style="width:64px">Other (hrs)</th>
-          <th>Other (description)</th>
-          <th style="width:54px">Total</th>
+          <th style="width:90px;text-align:left;padding-left:14px">Day / Punch</th>
+          <th style="width:72px">Clock In</th>
+          <th style="width:72px">Clock Out</th>
+          <th style="width:52px">Math Gym</th>
+          <th style="width:72px">Virtual Math Gym</th>
+          <th style="width:50px">Lecture</th>
+          <th style="width:52px">Meeting</th>
+          <th style="width:50px">Grading</th>
+          <th style="width:52px">Other</th>
+          <th class="col-other-desc">Other (description)</th>
+          <th style="width:48px">Total</th>
           <th class="th-action"></th>
         </tr>
       </thead>
@@ -498,7 +502,7 @@
 </div>
 <script>
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-const TASK_COLS = ['math-gym','virt-gym','lecture','meeting','grading','teaching','other-hrs'];
+const TASK_COLS = ['math-gym','virt-gym','lecture','meeting','grading','other-hrs'];
 // punchCount[di] = next punch index for that day
 const punchCount = {};
 
@@ -541,7 +545,7 @@ function insertPunch(tbody, di) {
     <td></td>
     ${TASK_COLS.filter(c => c !== 'other-hrs').map(c => `<td style="text-align:center"><input type="number" id="${c}-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>`).join('')}
     <td style="text-align:center"><input type="number" id="other-hrs-${di}-${p}" min="0" max="24" step="0.25" placeholder="—" oninput="recalc(${di},${p})"></td>
-    <td><input type="text" class="other-desc" id="desc-${di}-${p}" placeholder=""></td>
+    <td class="col-other-desc"><input type="text" class="other-desc" id="desc-${di}-${p}" placeholder=""></td>
     <td class="row-total" id="rt-${di}-${p}">—</td>
     <td rowspan="2" style="text-align:center;vertical-align:middle;background:var(--cell-bg);border-right:none">
       ${p > 0 ? `<button class="remove-punch-btn" onclick="removePunch(${di},${p})" title="Remove">×</button>` : ''}
@@ -556,12 +560,29 @@ function insertPunch(tbody, di) {
     <td><input type="time" id="co-${di}-${p}"></td>
     <td colspan="8"></td>`;
 
+  // Print-only row showing Other description text beneath the punch
+  const descPrintTr = document.createElement('tr');
+  descPrintTr.className = 'desc-print-row';
+  descPrintTr.id = `desc-print-${di}-${p}`;
+  descPrintTr.innerHTML = `<td colspan="11" id="desc-print-cell-${di}-${p}"></td>`;
+
   if (anchor) {
     tbody.insertBefore(inTr, anchor);
     tbody.insertBefore(outTr, anchor);
+    tbody.insertBefore(descPrintTr, anchor);
   } else {
     tbody.appendChild(inTr);
     tbody.appendChild(outTr);
+    tbody.appendChild(descPrintTr);
+  }
+
+  // Keep desc-print-cell in sync with the text input
+  const descInput = document.getElementById(`desc-${di}-${p}`);
+  const descCell = document.getElementById(`desc-print-cell-${di}-${p}`);
+  if (descInput && descCell) {
+    descInput.addEventListener('input', () => {
+      descCell.textContent = descInput.value ? `Other: ${descInput.value}` : '';
+    });
   }
 }
 
@@ -585,6 +606,7 @@ function addPunch(di) {
 function removePunch(di, p) {
   document.getElementById(`in-${di}-${p}`)?.remove();
   document.getElementById(`out-${di}-${p}`)?.remove();
+  document.getElementById(`desc-print-${di}-${p}`)?.remove();
   calcTotals();
 }
 
