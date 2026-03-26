@@ -251,11 +251,15 @@
     background: white;
     color: var(--ink);
     padding: 14px 10px;
-    border: 2px solid var(--ink);
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    border-right: 1px solid var(--rule);
     text-align: center;
     font-size: 13px;
     font-weight: 500;
   }
+  .week-total-row td:first-child { border-left: 2px solid var(--ink); }
+  .week-total-row td:last-child { border-right: 2px solid var(--ink); }
   .week-total-row td:first-child {
     text-align: left;
     padding-left: 14px;
@@ -385,6 +389,76 @@
   }
   .sig-date-input:focus { border-bottom-color: var(--accent); }
 
+  /* Sticky totals bar */
+  .sticky-totals {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--ink);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    gap: 0;
+    z-index: 100;
+    font-family: 'EB Garamond', serif;
+    font-size: 14px;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
+  }
+  .sticky-totals .st-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-right: 20px;
+    white-space: nowrap;
+  }
+  .sticky-totals .st-items {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .sticky-totals .st-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+  }
+  .sticky-totals .st-item-label {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .sticky-totals .st-item-val {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+  }
+  .sticky-totals .st-grand {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #e8675a;
+    margin-left: 20px;
+    white-space: nowrap;
+  }
+  .sticky-totals .st-grand-label {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    display: block;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  /* Push page content up so sticky bar doesn't overlap */
+  body { padding-bottom: 80px; }
+  @media print { .sticky-totals { display: none !important; } body { padding-bottom: 0; } }
+
   /* Actions */
   .actions {
     margin-top: 1.5rem;
@@ -500,6 +574,23 @@
     <button class="btn btn-primary" onclick="exportPDF()">Export as PDF</button>
   </div>
 
+</div>
+
+<!-- Sticky totals bar -->
+<div class="sticky-totals">
+  <span class="st-label">Week Total</span>
+  <div class="st-items">
+    <div class="st-item"><span class="st-item-label">Math Gym</span><span class="st-item-val" id="st-math-gym">0.00</span></div>
+    <div class="st-item"><span class="st-item-label">Virtual MG</span><span class="st-item-val" id="st-virt-gym">0.00</span></div>
+    <div class="st-item"><span class="st-item-label">Lecture</span><span class="st-item-val" id="st-lecture">0.00</span></div>
+    <div class="st-item"><span class="st-item-label">Meeting</span><span class="st-item-val" id="st-meeting">0.00</span></div>
+    <div class="st-item"><span class="st-item-label">Grading</span><span class="st-item-val" id="st-grading">0.00</span></div>
+    <div class="st-item"><span class="st-item-label">Other</span><span class="st-item-val" id="st-other-hrs">0.00</span></div>
+  </div>
+  <div style="text-align:center">
+    <span class="st-grand-label">Grand Total</span>
+    <span class="st-grand" id="st-grand">0.00</span>
+  </div>
 </div>
 <script>
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -626,10 +717,15 @@ function calcTotals() {
     document.querySelectorAll(`[id^="${c}-"]`).forEach(el => { col += parseFloat(el.value) || 0; });
     const ct = document.getElementById(`ct-${c}`);
     if (ct) ct.textContent = col.toFixed(2);
+    // Update sticky bar
+    const st = document.getElementById(`st-${c}`);
+    if (st) st.textContent = col.toFixed(2);
     grand += col;
   });
   const g = document.getElementById('grand-total');
   if (g) g.textContent = grand.toFixed(2);
+  const sg = document.getElementById('st-grand');
+  if (sg) sg.textContent = grand.toFixed(2);
 }
 
 function clearAll() {
