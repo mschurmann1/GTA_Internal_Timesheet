@@ -246,6 +246,24 @@
   .remove-punch-btn:hover { color: var(--accent); }
   .desc-print-row { display: none; }
 
+  /* Repeat header row above week total */
+  .repeat-header-row {
+    background: var(--header-bg);
+    color: var(--header-fg);
+  }
+  .repeat-header-row th {
+    padding: 8px 7px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+  }
+  .repeat-header-row th:first-child { text-align: left; padding-left: 14px; }
+  @media print { .repeat-header-row { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
   /* Week total */
   .week-total-row td {
     background: white;
@@ -567,6 +585,23 @@ function insertPunch(tbody, di) {
 }
 
 function insertTotalsRow(tbody) {
+  // Repeat header row
+  const htr = document.createElement('tr');
+  htr.className = 'repeat-header-row';
+  htr.innerHTML = `
+    <th colspan="3"></th>
+    <th style="width:72px">Math Gym</th>
+    <th style="width:90px">Virtual MG</th>
+    <th style="width:66px">Lecture</th>
+    <th style="width:70px">Meeting</th>
+    <th style="width:66px">Grading</th>
+    <th style="width:60px">Other</th>
+    <th></th>
+    <th style="width:60px">Total</th>
+    <th class="th-action"></th>`;
+  tbody.appendChild(htr);
+
+  // Totals row
   const tr = document.createElement('tr');
   tr.className = 'week-total-row';
   tr.id = 'totals-row';
