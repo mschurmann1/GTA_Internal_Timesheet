@@ -419,181 +419,6 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
   .btn-primary:hover { background: #a93226; border-color: #a93226; }
 
-
-  /* ── Mobile Responsive ── */
-  @media (max-width: 700px) {
-    body { padding: 0 0 4rem; font-size: 15px; }
-    .page-wrap { max-width: 100%; }
-
-    /* Header */
-    .sheet-header { padding: 1.2rem 1rem 1rem; border-radius: 0; }
-    .sheet-header h1 { font-size: 1.1rem; }
-    .sheet-header .sheet-note { font-size: 11px; }
-
-    /* Meta */
-    .meta-row { grid-template-columns: 1fr; padding: 0.8rem 1rem; gap: 1rem; }
-
-    /* Hide the desktop table entirely */
-    .timesheet-table-wrap { display: none; }
-
-    /* Show mobile accordion */
-    .mobile-days { display: block; border: 1px solid var(--rule); border-top: none; }
-    .mobile-day { border-bottom: 1px solid var(--rule); }
-    .mobile-day-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: #eae7e0;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 15px;
-      user-select: none;
-    }
-    .mobile-day-header .day-name { font-size: 16px; font-weight: 700; }
-    .mobile-day-header .day-date-m {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 400;
-    }
-    .mobile-day-header .chevron {
-      font-size: 12px;
-      color: var(--muted);
-      transition: transform 0.2s;
-    }
-    .mobile-day.open .chevron { transform: rotate(180deg); }
-    .mobile-day-body { display: none; padding: 12px 16px; background: white; }
-    .mobile-day.open .mobile-day-body { display: block; }
-
-    /* Punch card */
-    .mobile-punch {
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
-      background: #fafaf8;
-      position: relative;
-    }
-    .mobile-punch-times {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .mobile-field label {
-      display: block;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      margin-bottom: 3px;
-    }
-    .mobile-field input {
-      width: 100%;
-      border: none;
-      border-bottom: 1.5px solid var(--rule);
-      background: transparent;
-      font-family: 'Outfit', sans-serif;
-      font-size: 15px;
-      color: var(--ink);
-      padding: 4px 2px;
-      outline: none;
-    }
-    .mobile-field input:focus { border-bottom-color: var(--accent); }
-    .mobile-hours-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .mobile-punch .remove-m-btn {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: none;
-      border: none;
-      font-size: 18px;
-      color: #ccc;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .mobile-punch .remove-m-btn:hover { color: var(--accent); }
-    .add-punch-m-btn {
-      width: 100%;
-      padding: 8px;
-      border: 1px dashed var(--muted);
-      border-radius: 4px;
-      background: transparent;
-      color: var(--muted);
-      font-family: 'Outfit', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.15s;
-      margin-top: 4px;
-    }
-    .add-punch-m-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Mobile day total */
-    .mobile-day-total {
-      text-align: right;
-      font-size: 13px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-    .mobile-day-total span { color: var(--accent); font-weight: 700; }
-
-    /* Mobile week summary */
-    .mobile-week-summary {
-      background: white;
-      border: 2px solid var(--ink);
-      padding: 12px 16px;
-      margin-top: 0;
-    }
-    .mobile-week-summary h3 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .mobile-summary-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .mobile-summary-item { text-align: center; }
-    .mobile-summary-item .s-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      display: block;
-    }
-    .mobile-summary-item .s-val {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--ink);
-    }
-    .mobile-grand-total {
-      text-align: center;
-      border-top: 1px solid var(--rule);
-      padding-top: 8px;
-    }
-    .mobile-grand-total .s-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); display: block; }
-    .mobile-grand-total .s-val { font-size: 26px; font-weight: 700; color: var(--accent); }
-
-    /* Sig section */
-    .sig-section { grid-template-columns: 1fr; padding: 1rem; }
-    .comments-section { padding: 0.8rem 1rem; }
-    .actions { padding: 0 1rem; flex-direction: column; }
-    .btn { width: 100%; text-align: center; padding: 14px; }
-  }
-
-  /* Hide mobile on desktop */
-  .mobile-days, .mobile-week-summary { display: none; }
-
   /* Print */
   @media print {
     body { background: white; padding: 0; font-size: 13px; }
@@ -608,7 +433,6 @@
     .sig-clear-btn { display: none !important; }
     #sig-canvas { border-bottom: 1.5px solid black; }
     .desc-print-row { display: none !important; }
-    .mobile-days, .mobile-week-summary { display: none !important; }
     @page { margin: 0.45in 0.4in; size: letter landscape; }
   }
 </style>
@@ -619,7 +443,7 @@
   <div class="sheet-header">
     <div class="subtitle">Internal Document</div>
     <h1>Graduate Teaching Assistant &mdash; Timesheet</h1>
-    <p class="sheet-note">Note: Complete individual time punch for each task. Please include notes in the comment section including the date for any time listed as other.</p>
+    <p class="sheet-note">Note: Complete an individual time punch for each task. Please include notes in the comment section including the date for any time listed as other.</p>
   </div>
 
   <div class="meta-row">
@@ -651,26 +475,6 @@
       </thead>
       <tbody id="tbody"></tbody>
     </table>
-  </div>
-
-  <!-- Mobile accordion view -->
-  <div class="mobile-days" id="mobile-days"></div>
-
-  <!-- Mobile week summary -->
-  <div class="mobile-week-summary" id="mobile-summary" style="display:none">
-    <h3>Week Total</h3>
-    <div class="mobile-summary-grid">
-      <div class="mobile-summary-item"><span class="s-label">Math Gym</span><span class="s-val" id="ms-math-gym">0.00</span></div>
-      <div class="mobile-summary-item"><span class="s-label">Virtual MG</span><span class="s-val" id="ms-virt-gym">0.00</span></div>
-      <div class="mobile-summary-item"><span class="s-label">Lecture</span><span class="s-val" id="ms-lecture">0.00</span></div>
-      <div class="mobile-summary-item"><span class="s-label">Meeting</span><span class="s-val" id="ms-meeting">0.00</span></div>
-      <div class="mobile-summary-item"><span class="s-label">Grading</span><span class="s-val" id="ms-grading">0.00</span></div>
-      <div class="mobile-summary-item"><span class="s-label">Other</span><span class="s-val" id="ms-other-hrs">0.00</span></div>
-    </div>
-    <div class="mobile-grand-total">
-      <span class="s-label">Grand Total</span>
-      <span class="s-val" id="ms-grand">0.00</span>
-    </div>
   </div>
 
   <div class="comments-section">
@@ -927,153 +731,7 @@ function clearSig() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// ── Mobile View ──
-const TASK_LABELS = {
-  'math-gym': 'Math Gym',
-  'virt-gym': 'Virtual MG',
-  'lecture': 'Lecture',
-  'meeting': 'Meeting',
-  'grading': 'Grading',
-  'other-hrs': 'Other'
-};
-const mPunchCount = {};
-
 buildTable();
-buildMobileView();
-
-function buildMobileView() {
-  const container = document.getElementById('mobile-days');
-  if (!container) return;
-  container.innerHTML = '';
-  DAYS.forEach((day, di) => {
-    mPunchCount[di] = 0;
-    const dayDiv = document.createElement('div');
-    dayDiv.className = 'mobile-day';
-    dayDiv.id = `m-day-${di}`;
-
-    const header = document.createElement('div');
-    header.className = 'mobile-day-header';
-    header.innerHTML = `
-      <div>
-        <span class="day-name">${day}</span>
-        <span class="day-date-m" id="m-date-label-${di}"></span>
-      </div>
-      <span class="chevron">▼</span>`;
-    header.addEventListener('click', () => {
-      dayDiv.classList.toggle('open');
-    });
-
-    const body = document.createElement('div');
-    body.className = 'mobile-day-body';
-    body.id = `m-body-${di}`;
-
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-punch-m-btn';
-    addBtn.textContent = '+ Add Punch';
-    addBtn.onclick = () => addMobilePunch(di);
-
-    const dayTotal = document.createElement('div');
-    dayTotal.className = 'mobile-day-total';
-    dayTotal.innerHTML = `Day Total: <span id="m-day-total-${di}">0.00</span>`;
-
-    body.appendChild(addBtn);
-    body.appendChild(dayTotal);
-    dayDiv.appendChild(header);
-    dayDiv.appendChild(body);
-    container.appendChild(dayDiv);
-
-    addMobilePunch(di);
-  });
-  updateMobileSummary();
-  showMobileSummary();
-}
-
-function addMobilePunch(di) {
-  const p = mPunchCount[di]++;
-  const body = document.getElementById(`m-body-${di}`);
-  const addBtn = body.querySelector('.add-punch-m-btn');
-
-  const punchDiv = document.createElement('div');
-  punchDiv.className = 'mobile-punch';
-  punchDiv.id = `m-punch-${di}-${p}`;
-
-  const removeBtn = p > 0 ? `<button class="remove-m-btn" onclick="removeMobilePunch(${di},${p})">×</button>` : '';
-
-  punchDiv.innerHTML = `
-    ${removeBtn}
-    <div class="mobile-punch-times">
-      <div class="mobile-field">
-        <label>Clock In</label>
-        <input type="time" id="m-ci-${di}-${p}" oninput="syncMobileToDesktop(${di},${p})">
-      </div>
-      <div class="mobile-field">
-        <label>Clock Out</label>
-        <input type="time" id="m-co-${di}-${p}" oninput="syncMobileToDesktop(${di},${p})">
-      </div>
-    </div>
-    <div class="mobile-hours-grid">
-      ${TASK_COLS.map(c => `
-        <div class="mobile-field">
-          <label>${TASK_LABELS[c]}</label>
-          <input type="number" id="m-${c}-${di}-${p}" min="0" max="24" step="0.25" placeholder="0"
-            oninput="syncMobileToDesktop(${di},${p}); calcMobileDayTotal(${di}); updateMobileSummary()">
-        </div>`).join('')}
-    </div>`;
-
-  body.insertBefore(punchDiv, addBtn);
-}
-
-function removeMobilePunch(di, p) {
-  document.getElementById(`m-punch-${di}-${p}`)?.remove();
-  calcMobileDayTotal(di);
-  updateMobileSummary();
-}
-
-function syncMobileToDesktop(di, p) {
-  // Sync times
-  const mci = document.getElementById(`m-ci-${di}-${p}`);
-  const mco = document.getElementById(`m-co-${di}-${p}`);
-  const dci = document.getElementById(`ci-${di}-${p}`);
-  const dco = document.getElementById(`co-${di}-${p}`);
-  if (mci && dci) dci.value = mci.value;
-  if (mco && dco) dco.value = mco.value;
-  // Sync hours
-  TASK_COLS.forEach(c => {
-    const mel = document.getElementById(`m-${c}-${di}-${p}`);
-    const del = document.getElementById(`${c}-${di}-${p}`);
-    if (mel && del) del.value = mel.value;
-  });
-  recalc(di, p);
-}
-
-function calcMobileDayTotal(di) {
-  let total = 0;
-  for (let p = 0; p < mPunchCount[di]; p++) {
-    TASK_COLS.forEach(c => {
-      total += parseFloat(document.getElementById(`m-${c}-${di}-${p}`)?.value) || 0;
-    });
-  }
-  const el = document.getElementById(`m-day-total-${di}`);
-  if (el) el.textContent = total.toFixed(2);
-}
-
-function updateMobileSummary() {
-  let grand = 0;
-  TASK_COLS.forEach(c => {
-    let col = 0;
-    document.querySelectorAll(`[id^="m-${c}-"]`).forEach(el => { col += parseFloat(el.value) || 0; });
-    const el = document.getElementById(`ms-${c}`);
-    if (el) el.textContent = col.toFixed(2);
-    grand += col;
-  });
-  const g = document.getElementById('ms-grand');
-  if (g) g.textContent = grand.toFixed(2);
-}
-
-function showMobileSummary() {
-  const el = document.getElementById('mobile-summary');
-  if (el) el.style.display = '';
-}
 
 document.getElementById('week-of').addEventListener('change', function () {
   const mon = new Date(this.value + 'T00:00:00');
@@ -1081,12 +739,8 @@ document.getElementById('week-of').addEventListener('change', function () {
   DAYS.forEach((_, di) => {
     const d = new Date(mon);
     d.setDate(mon.getDate() + di);
-    const iso = d.toISOString().split('T')[0];
     const el = document.getElementById(`date-${di}`);
-    if (el) el.value = iso;
-    // Update mobile date label
-    const ml = document.getElementById(`m-date-label-${di}`);
-    if (ml) ml.textContent = ' ' + d.toLocaleDateString('en-US', {month:'numeric', day:'numeric'});
+    if (el) el.value = d.toISOString().split('T')[0];
   });
 });
 </script>
