@@ -129,7 +129,6 @@
     white-space: nowrap;
   }
   thead th:first-child { text-align: left; padding-left: 14px; }
-  thead th.th-action { width: 28px; border-right: none; }
 
   /* Day label */
   .day-label-row td {
@@ -214,18 +213,6 @@
     padding: 2px;
     outline: none;
     text-align: center;
-    transition: border-color 0.2s;
-  }
-  input[type="text"].other-desc {
-    border: none;
-    border-bottom: 1px solid var(--rule);
-    background: transparent;
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    color: var(--ink);
-    width: 100%;
-    padding: 2px;
-    outline: none;
     transition: border-color 0.2s;
   }
   input:focus { border-bottom-color: var(--accent) !important; }
@@ -362,9 +349,6 @@
     touch-action: none;
   }
   .sig-clear-btn {
-    position: absolute;
-    top: 6px;
-    right: 6px;
     font-family: 'Outfit', sans-serif;
     font-size: 11px;
     letter-spacing: 0.1em;
@@ -378,6 +362,25 @@
     transition: all 0.15s;
   }
   .sig-clear-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .sig-btn-group {
+    display: flex;
+    gap: 6px;
+    margin: 6px 0 4px;
+  }
+  .sig-upload-btn {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: white;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sig-upload-btn:hover { border-color: var(--accent); color: var(--accent); }
   .sig-line { border-bottom: 1.5px solid var(--ink); height: 36px; }
   .sig-hint { font-size: 12px; color: var(--muted); font-style: italic; }
   .sig-date-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px; }
@@ -419,6 +422,16 @@
   .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
   .btn-primary:hover { background: #a93226; border-color: #a93226; }
 
+  .save-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+    text-align: right;
+  }
+  @media print { .save-note { display: none; } }
+
   /* Print */
   @media print {
     body { background: white; padding: 0; font-size: 13px; }
@@ -431,6 +444,7 @@
     .sig-line { border-bottom: 1.5px solid black !important; }
     .sig-pad-wrap { border: none !important; background: transparent !important; }
     .sig-clear-btn { display: none !important; }
+    .sig-btn-group { display: none !important; }
     #sig-canvas { border-bottom: 1.5px solid black; }
     .desc-print-row { display: none !important; }
     @page { margin: 0.45in 0.4in; size: letter landscape; }
@@ -487,10 +501,16 @@
       <label>Graduate Teaching Assistant Signature</label>
       <div class="sig-pad-wrap">
         <canvas id="sig-canvas" width="420" height="80"></canvas>
+      </div>
+      <div class="sig-btn-group">
         <button class="sig-clear-btn" onclick="clearSig()">Clear</button>
+        <label class="sig-upload-btn" title="Upload signature image">
+          Upload Digital Signature
+          <input type="file" id="sig-upload" accept="image/*" style="display:none" onchange="loadSigImage(event)">
+        </label>
       </div>
       <div class="sig-date-row">
-        <span class="sig-hint">Sign above before submitting</span>
+        <span class="sig-hint">Sign above or upload a digital signature before submitting.</span>
         <span class="sig-date-label">Date: <input type="date" id="gta-sig-date" class="sig-date-input"></span>
       </div>
     </div>
@@ -506,8 +526,11 @@
 
   <div class="actions">
     <button class="btn" onclick="clearAll()">Clear Form</button>
+    <button class="btn" onclick="saveProgress()" id="save-btn">Save Progress</button>
     <button class="btn btn-primary" onclick="exportPDF()">Export as PDF</button>
   </div>
+  <div id="save-msg" style="text-align:right;font-size:12px;color:var(--muted);margin-top:6px;min-height:16px;"></div>
+  <p class="save-note">&#9432; Progress is saved to this browser and device only. Use the same browser on the same device to retrieve your saved data. Clicking <strong>Clear Form</strong> will permanently erase any saved progress.</p>
 
 </div>
 <script>
@@ -578,8 +601,6 @@ function insertPunch(tbody, di) {
     tbody.appendChild(outTr);
     tbody.appendChild(descPrintTr);
   }
-
-
 }
 
 function insertTotalsRow(tbody) {
@@ -594,8 +615,7 @@ function insertTotalsRow(tbody) {
     <th style="width:70px">Meeting</th>
     <th style="width:66px">Grading</th>
     <th style="width:60px">Other</th>
-    <th style="width:60px">Total</th>
-`;
+    <th style="width:60px">Total</th>`;
   tbody.appendChild(htr);
 
   // Totals row
@@ -605,8 +625,7 @@ function insertTotalsRow(tbody) {
   tr.innerHTML = `
     <td colspan="3">Week Total</td>
     ${TASK_COLS.map(c => `<td class="col-total" id="ct-${c}">0.00</td>`).join('')}
-    <td class="grand-total" id="grand-total">0.00</td>
-    <td></td>`;
+    <td class="grand-total" id="grand-total">0.00</td>`;
   tbody.appendChild(tr);
 }
 
@@ -643,13 +662,16 @@ function calcTotals() {
 }
 
 function clearAll() {
-  if (!confirm('Clear all entered data?')) return;
+  if (!confirm('Clear all entered data? This will also clear any saved progress.')) return;
+  localStorage.removeItem('gta_timesheet');
   document.getElementById('emp-name').value = '';
   document.getElementById('week-of').value = '';
   document.getElementById('comments').value = '';
   document.getElementById('gta-sig-date').value = '';
   clearSig();
   buildTable();
+  const msg = document.getElementById('save-msg');
+  if (msg) msg.textContent = '';
 }
 
 function exportPDF() {
@@ -725,13 +747,128 @@ function exportPDF() {
   canvas.addEventListener('touchend', stopDraw);
 })();
 
+function loadSigImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const canvas = document.getElementById('sig-canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = function() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Scale image to fit canvas while preserving aspect ratio
+      const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+      const x = (canvas.width - img.width * scale) / 2;
+      const y = (canvas.height - img.height * scale) / 2;
+      ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+    };
+    img.src = e.target.result;
+    // Reset input so same file can be re-uploaded
+    event.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
 function clearSig() {
   const canvas = document.getElementById('sig-canvas');
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+// ── localStorage Save/Load ──
+function saveProgress() {
+  const data = {
+    name: document.getElementById('emp-name').value,
+    weekOf: document.getElementById('week-of').value,
+    comments: document.getElementById('comments').value,
+    sigDate: document.getElementById('gta-sig-date').value,
+    sig: document.getElementById('sig-canvas').toDataURL(),
+    punches: {}
+  };
+
+  // Save punch times and hours
+  DAYS.forEach((_, di) => {
+    data.punches[di] = [];
+    for (let p = 0; p < punchCount[di]; p++) {
+      const punch = {
+        ci: document.getElementById(`ci-${di}-${p}`)?.value || '',
+        co: document.getElementById(`co-${di}-${p}`)?.value || '',
+        hours: {}
+      };
+      TASK_COLS.forEach(c => {
+        punch.hours[c] = document.getElementById(`${c}-${di}-${p}`)?.value || '';
+      });
+      data.punches[di].push(punch);
+    }
+  });
+
+  localStorage.setItem('gta_timesheet', JSON.stringify(data));
+  const msg = document.getElementById('save-msg');
+  if (msg) {
+    msg.textContent = 'Progress saved at ' + new Date().toLocaleTimeString();
+    setTimeout(() => { msg.textContent = ''; }, 4000);
+  }
+}
+
+function loadProgress() {
+  const raw = localStorage.getItem('gta_timesheet');
+  if (!raw) return;
+  const data = JSON.parse(raw);
+
+  document.getElementById('emp-name').value = data.name || '';
+  document.getElementById('week-of').value = data.weekOf || '';
+  document.getElementById('comments').value = data.comments || '';
+  document.getElementById('gta-sig-date').value = data.sigDate || '';
+
+  // Restore signature
+  if (data.sig && data.sig !== 'data:,') {
+    const canvas = document.getElementById('sig-canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0);
+    img.src = data.sig;
+  }
+
+  // Restore week dates
+  if (data.weekOf) {
+    const mon = new Date(data.weekOf + 'T00:00:00');
+    if (!isNaN(mon)) {
+      DAYS.forEach((_, di) => {
+        const d = new Date(mon);
+        d.setDate(mon.getDate() + di);
+        const el = document.getElementById(`date-${di}`);
+        if (el) el.value = d.toISOString().split('T')[0];
+      });
+    }
+  }
+
+  // Restore punches
+  if (data.punches) {
+    DAYS.forEach((_, di) => {
+      const punches = data.punches[di] || [];
+      // First punch already exists, add extra ones
+      for (let p = 1; p < punches.length; p++) {
+        insertPunch(document.getElementById('tbody'), di);
+      }
+      punches.forEach((punch, p) => {
+        const ci = document.getElementById(`ci-${di}-${p}`);
+        const co = document.getElementById(`co-${di}-${p}`);
+        if (ci) ci.value = punch.ci;
+        if (co) co.value = punch.co;
+        TASK_COLS.forEach(c => {
+          const el = document.getElementById(`${c}-${di}-${p}`);
+          if (el) el.value = punch.hours[c] || '';
+        });
+        recalc(di, p);
+      });
+    });
+  }
+  calcTotals();
+}
+
 buildTable();
+loadProgress();
 
 document.getElementById('week-of').addEventListener('change', function () {
   const mon = new Date(this.value + 'T00:00:00');
